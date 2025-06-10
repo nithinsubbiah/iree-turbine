@@ -39,12 +39,12 @@ def get_speculative_decoding_kernel(
     dynamic_symbols = []
     dynamic_symbols_map = {}
 
-    constraints = [tkw.WorkgroupConstraint(VOCAB_SIZE, BLOCK_VOCAB_SIZE, 0)]
+    constraints = [tkw.WorkgroupConstraint(VOCAB_SIZE, VOCAB_SIZE, 0)]
     constraints += [tkw.WorkgroupConstraint(BATCH_SIZE, BLOCK_BATCH_SIZE, 1)]
     constraints += [
         tkw.WorkgroupConstraint(NUM_DRAFT_TOKENS, BLOCK_NUM_DRAFT_TOK, 1, primary=False)
     ]
-    constraints += [tkw.WaveConstraint(VOCAB_SIZE, BLOCK_VOCAB_SIZE)]
+    constraints += [tkw.WaveConstraint(VOCAB_SIZE, VOCAB_SIZE)]
     constraints += [
         tkw.HardwareConstraint(
             threads_per_wave=64,
