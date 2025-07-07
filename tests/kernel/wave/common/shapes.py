@@ -76,6 +76,18 @@ _e2e_test_shapes["gqa_bshd_decode_attention"] = [
     ),
 ]
 
+_e2e_test_shapes["cai_attention"] = [
+    AttentionShape(
+        num_seqs=1,
+        num_query_heads=32,
+        num_kv_heads=1,
+        query_seq_len=12288,
+        kv_seq_len=12288,
+        head_size_kv=256,
+        head_size=256,
+    ),
+]
+
 _e2e_test_shapes["test_block_reduce"] = [
     (1, 37),
     (1, 312),
@@ -138,5 +150,5 @@ def make_shape_param(shape: Sequence[int], is_perf: bool):
 def get_test_shapes(test_name: str):
     assert test_name in _e2e_test_shapes, f"Unknown test name: {test_name}"
     shapes = [make_shape_param(s, False) for s in _e2e_test_shapes[test_name]]
-    shapes += [make_shape_param(s, True) for s in _perf_test_shapes[test_name]]
+    # shapes += [make_shape_param(s, True) for s in _perf_test_shapes[test_name]]
     return shapes

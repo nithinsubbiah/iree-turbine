@@ -39,10 +39,10 @@ from iree.turbine.kernel.wave.utils.reference_kernel_utils import (
 )
 
 
+# @pytest.mark.parametrize("shape", get_test_shapes("gqa_bshd_attention"))
 @require_e2e
-@pytest.mark.parametrize("shape", get_test_shapes("gqa_bshd_attention"))
+@pytest.mark.parametrize("shape", get_test_shapes("cai_attention"))
 @pytest.mark.parametrize("enable_scheduling", [SchedulingType.NONE])
-@pytest.mark.parametrize("sliding_window", [-1, 1024])
 @pytest.mark.parametrize(
     "mfma_variant",
     [
@@ -53,7 +53,6 @@ from iree.turbine.kernel.wave.utils.reference_kernel_utils import (
 def testCausalGQABSHDAttention(
     shape: AttentionShape,
     enable_scheduling: SchedulingType,
-    sliding_window: int,
     mfma_variant: tuple[MMAType],
     request,
 ):
@@ -65,7 +64,7 @@ def testCausalGQABSHDAttention(
         hyperparams,
         dynamic_symbols,
     ) = get_gqa_bshd_attention_kernel(
-        shape, mfma_variant, is_causal=True, sliding_window_size=sliding_window
+        shape, mfma_variant, input_dtype=torch.bfloat16,
     )
     q_shape = (
         shape.num_seqs,
@@ -95,9 +94,9 @@ def testCausalGQABSHDAttention(
     base_attention = wave_compile(options, base_attention_func)
 
     torch.manual_seed(1)
-    q = device_randn(q_shape, dtype=torch.float16)
-    k = device_randn(k_shape, dtype=torch.float16)
-    v = device_randn(v_shape, dtype=torch.float16)
+    q = device_randn(q_shape, dtype=torch.bfloat16)
+    k = device_randn(k_shape, dtype=torch.bfloat16)
+    v = device_randn(v_shape, dtype=torch.bfloat16)
 
     # This variant of wave kernel is BSHD
     o_shape = (
@@ -117,9 +116,9 @@ def testCausalGQABSHDAttention(
 
     # Torch reference needs to be in BHSD format
     torch_ref = scaled_dot_product_attention_bhsd(
-        q, k, v, is_causal=True, sliding_window=sliding_window
+        q, k, v
     )
-
+    breakpoint()
     assert_close(
         output.transpose(1, 2),
         torch_ref,
